@@ -5,13 +5,13 @@ import scrapy
 
 class ImdbSpider(scrapy.Spider):
     '''
-    Scrappy spider OBJ to crawl IMDB
+    Scrappy spider OBJ to crawl IMDB. Inherits from scrapy spider (scrapy.Spider)
 
-    Parameters
-    ---------
-
-
-
+    Methods
+    -------
+    parse: function to go from start page to full credits
+    parse_full_credits: pulls paths for each actor in credits
+    parse_actor page: scrapes an actor's page
 
     '''
 
@@ -23,7 +23,14 @@ class ImdbSpider(scrapy.Spider):
 
     def parse(self, response):
         '''
+        Function starts at the class's set start_url and joins to it "fullcredits",
+        then passes that next page to scrapy Request OBJ and invokes parse_full_credits
+        as the callback.
 
+        Parameters
+        ----------
+        self: the IMDB spider OBJ itself
+        response: Response OBJ of this spider (inherited from scrapy.Spider)
         '''
         #join current url w/ string to create url to full credits page
         next_page = response.urljoin("fullcredits")
@@ -35,8 +42,14 @@ class ImdbSpider(scrapy.Spider):
     
     def parse_full_credits(self, response):
         '''
+        Function to build a list of relative paths for each actor in the full credits and
+        then for each path, invoke parse_actor_page as the callback arg of a Request 
+        given the url built from that path, to scrape that actor's page.
 
-
+        Parameters
+        ----------
+        self: the IMDB spider OBJ itself
+        response: Response OBJ of this spider (inherited from scrapy.Spider)
         '''
         #create list of relative paths for each actor (clicking on a headshot)
         actor_list = [a.attrib["href"] for a in response.css("td.primary_photo a")]
@@ -54,7 +67,13 @@ class ImdbSpider(scrapy.Spider):
 
     def parse_actor_page(self, response):
         '''
+        Function to scrape and actor's credits page and yield a dict of the form
+        { "actor" : actor_name, "title" : title } for each credit on that page.
 
+        Parameters
+        ----------
+        self: the IMDB spider OBJ itself
+        response: Response OBJ of this spider (inherited from scrapy.Spider)
 
         '''
         #Pull actor name from header 
